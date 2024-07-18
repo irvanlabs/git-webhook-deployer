@@ -9,7 +9,7 @@ const port = parseInt(process.env.APP_PORT);
 app.use(express.json());
 
 // Route untuk menerima webhook
-app.post('/:projectId/webhook/', (req, res) => {
+app.post('/:projectId/deploy/', (req, res) => {
     let project_dir;
     if(req.params.projectId==1){
         project_dir = process.env.PROJECT1_DIR
@@ -22,11 +22,6 @@ app.post('/:projectId/webhook/', (req, res) => {
         if (error) {
             console.error(`Error executing deploy script: ${error.message}`);
             return res.status(500).send('Error executing deploy script');
-        }
-
-        if (stderr) {
-            console.error(`Deploy script stderr: ${stderr}`);
-            return res.status(500).send('Error in deploy script');
         }
 
         console.log(`Deploy script stdout: ${stdout}`);
