@@ -9,16 +9,28 @@ const port = parseInt(process.env.APP_PORT);
 app.use(express.json());
 
 // Route untuk menerima webhook
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
 app.post('/:projectId/deploy/', (req, res) => {
+    const projectId = req.params.projectId;
     let project_dir;
-    if(req.params.projectId==1){
-        project_dir = process.env.PROJECT1_DIR
-    } else if(req.params.projectId==2){
-        project_dir = process.env.PROJECT2_DIR
+
+    if (projectId == '1') {
+        project_dir = process.env.PROJECT1_DIR;
+    } else if (projectId == '2') {
+        project_dir = process.env.PROJECT2_DIR;
+    } else {
+        return res.status(400).send('Invalid projectId');
     }
 
-    // Jalankan skrip
-    exec(`sh ${project_dir}/deploy.sh`, (error, stdout, stderr) => {
+    if (!project_dir) {
+        return res.status(500).send('Project directory not configured');
+    }
+
+    const deployScript = path.join(project_dir, 'deploy.sh');
+
+    exec(`sh ${deployScript}`, (error, stdout, stderr) => {
         if (error) {
             console.error(`Error executing deploy script: ${error.message}`);
             return res.status(500).send('Error executing deploy script');
